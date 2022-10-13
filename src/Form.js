@@ -1,24 +1,45 @@
-import React, { useState} from 'react';
+import React, { useEffect, useState} from 'react';
 
 export default function Form() {
     const [team, setTeam] = useState([])
-  
     const [teamMember, setTeamMember] = useState({fname:"", lname:"", email: "", role:"", newHire:false})
+    const [editing, setEditing] = useState({})
+    const [inEditing, setInEditing] = useState(null)
+
     function onFormChange(evt) {
       setTeamMember({...teamMember, [evt.target.name]:evt.target.value})
     }
     function onFormCheck(evt) {
       setTeamMember({...teamMember, [evt.target.name]:evt.target.checked})
     }
-    function onSubmit(evt) {
+
+    function submitMember(evt) {
       evt.preventDefault();
       setTeam([...team, teamMember])
-      setTeamMember({fname:"", lname:"", age: "", role:"", newHire:false})
+      setTeamMember({fname:"", lname:"", email:"",role:"", newHire:false})
     }
+
+    function editMember(evt) {
+      evt.preventDefault();
+      team.splice(inEditing,1,teamMember)
+      setTeam([...team])
+      setTeamMember({fname:"", lname:"", email:"",role:"", newHire:false})
+      setEditing({})
+      setInEditing(null)
+    }
+
+    function editor(member,index) {
+      setEditing({...member})
+      setInEditing(index)
+
+    }
+
+    useEffect(()=>{setTeamMember(editing)},[editing])
+
     return (
       <div className="App">
       <h1>The BloomTechian React Team</h1>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={isNaN(inEditing) ? submitMember : editMember}>
           <label>
             First Name:<br></br>
             <input onChange={onFormChange} value={teamMember.fname} name="fname" type="text" />
@@ -46,7 +67,7 @@ export default function Form() {
           <br></br>
           <label>
             New Hire? (less than 6 months in role):
-            <input onChange={onFormCheck} value={teamMember.newHire} type="checkbox" name="newHire" />
+            <input onChange={onFormCheck} checked={teamMember.newHire} type="checkbox" name="newHire" />
           </label><br></br>
           <button>Submit Team Member</button>
         </form>
@@ -58,7 +79,11 @@ export default function Form() {
         New Hire Status: {String(teamMember.newHire)}</h3>
         <h4>
           Current team members:</h4> {
-            team.map((member,idx)=><h5 key={idx}>{member.fname+" "+member.lname}</h5>)
+            team.map((member,idx)=>{return(<div key={idx}>
+              <h5>{member.fname+" "+member.lname}</h5>
+              <button onClick={()=>editor(member,idx)}>Edit {member.fname}'s Entry</button>
+              </div>)
+          })
           }
       </div>
     );
