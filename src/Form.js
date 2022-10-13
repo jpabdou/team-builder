@@ -4,7 +4,7 @@ export default function Form() {
     const [team, setTeam] = useState([])
     const [teamMember, setTeamMember] = useState({fname:"", lname:"", email: "", role:"", newHire:false})
     const [editing, setEditing] = useState({})
-    const [inEditing, setInEditing] = useState(null)
+    const [inEditing, setInEditing] = useState(NaN)
 
     function onFormChange(evt) {
       setTeamMember({...teamMember, [evt.target.name]:evt.target.value})
@@ -25,7 +25,7 @@ export default function Form() {
       setTeam([...team])
       setTeamMember({fname:"", lname:"", email:"",role:"", newHire:false})
       setEditing({})
-      setInEditing(null)
+      setInEditing(NaN)
     }
 
     function editor(member,index) {
