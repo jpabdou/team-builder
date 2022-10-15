@@ -4,15 +4,32 @@ import * as yup from "yup"
 export default function Form() {
     const [team, setTeam] = useState([])
     const [teamMember, setTeamMember] = useState({fname:"", lname:"", email: "", role:"", newHire:false})
-    const [editing, setEditing] = useState({})
     const [inEditing, setInEditing] = useState(NaN)
     const [disabled, setDisabled] = useState(true)
+    const [errors, setErrors] = useState({
+      fname: "",
+      lname: "",
+      role: "",
+      email:"",
+      newHire:""
+    });
+
+    function setFormErrors(name, value){
+      yup.reach(formSchema, name).validate(value)
+      .then(()=>setErrors({...errors,[name]: ""}))
+      .catch(err=> setErrors({...errors, [name]:err.errors[0]}))
+    }
 
     function onFormChange(evt) {
+      const { value, name} = evt.target
       setTeamMember({...teamMember, [evt.target.name]:evt.target.value})
+      setFormErrors(name, value)
     }
     function onFormCheck(evt) {
+      const { checked, name} = evt.target
+
       setTeamMember({...teamMember, [evt.target.name]:evt.target.checked})
+      setFormErrors(name,checked)
     }
     const formSchema = yup.object().shape({
       fname: yup.string().required("First name required"),
@@ -37,17 +54,14 @@ export default function Form() {
       team.splice(inEditing,1,teamMember)
       setTeam([...team])
       setTeamMember({fname:"", lname:"", email:"",role:"", newHire:false})
-      setEditing({})
       setInEditing(NaN)
     }
 
     function editor(member,index) {
-      setEditing({...member})
+      setTeamMember({...member})
       setInEditing(index)
 
     }
-
-    useEffect(()=>{setTeamMember(editing)},[editing])
 
     return (
       <div className="App">
@@ -82,6 +96,7 @@ export default function Form() {
             New Hire? (less than 6 months in role):
             <input onChange={onFormCheck} checked={teamMember.newHire} type="checkbox" name="newHire" />
           </label><br></br>
+          <h6>{errors.fname} {errors.lname} {errors.role} {errors.email} {errors.newHire}</h6>
           <button disabled={disabled}>Submit Team Member</button>
         </form>
         <h3>Currently inputted member: <br></br>  
