@@ -1,10 +1,12 @@
 import React, { useEffect, useState} from 'react';
+import * as yup from "yup"
 
 export default function Form() {
     const [team, setTeam] = useState([])
     const [teamMember, setTeamMember] = useState({fname:"", lname:"", email: "", role:"", newHire:false})
     const [editing, setEditing] = useState({})
     const [inEditing, setInEditing] = useState(NaN)
+    const [disabled, setDisabled] = useState(true)
 
     function onFormChange(evt) {
       setTeamMember({...teamMember, [evt.target.name]:evt.target.value})
@@ -12,6 +14,17 @@ export default function Form() {
     function onFormCheck(evt) {
       setTeamMember({...teamMember, [evt.target.name]:evt.target.checked})
     }
+    const formSchema = yup.object().shape({
+      fname: yup.string().required("First name required"),
+      lname: yup.string().required("Last name required"),
+      role: yup.string().oneOf(["Team Manager", "Individual Contributor", "Apprentice/Entry Level"], "Role required"),
+      email: yup.string().email(),
+      newHire: yup.boolean()
+    })
+
+    useEffect(()=>{
+      formSchema.isValid(teamMember).then(valid=>setDisabled(!valid))
+    },[teamMember])
 
     function submitMember(evt) {
       evt.preventDefault();
@@ -58,10 +71,10 @@ export default function Form() {
           <label>
             Role:<br></br>
             <select onChange={onFormChange} value={teamMember.role} name="role">
-              <option />
-              <option>Team Manager</option>
-              <option>Individual Contributor</option>
-              <option>Apprentice/Entry Level</option>
+              <option value=""></option>
+              <option value="Team Manager">Team Manager</option>
+              <option value= "Individual Contributor">Individual Contributor</option>
+              <option value="Apprentice/Entry Level">Apprentice/Entry Level</option>
             </select>
           </label>
           <br></br>
@@ -69,7 +82,7 @@ export default function Form() {
             New Hire? (less than 6 months in role):
             <input onChange={onFormCheck} checked={teamMember.newHire} type="checkbox" name="newHire" />
           </label><br></br>
-          <button>Submit Team Member</button>
+          <button disabled={disabled}>Submit Team Member</button>
         </form>
         <h3>Currently inputted member: <br></br>  
         First Name: {teamMember.fname}<br></br>  
